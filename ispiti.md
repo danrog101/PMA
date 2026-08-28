@@ -232,3 +232,88 @@ Primjer: `1. fanpit – Daleka obala`, `2. regular – Bijelo Dugme`, `3. vip �
 - Napomena: podaci moraju biti izračunati iz dobivenog odgovora (ne „lokalno" brojanje!); server već sadrži nekoliko spremljenih popisa.
 
 Primjer: `1. Kava - 2€`, `2. Mlijeko - 1.7€`, `3. Kruh - 1€` … `Spremljeno popisa: 2`, `Cijena svih popisa: 11.19€`, `Cijena najskupljeg popisa: 6.49€`
+
+# Grupa B - Novi zaposleník
+
+Sa stranice kolegija preuzimite datoteku `"GrupaB.zip"` i otpakurajte arhivu na računalo. U datoteci se nalazi početni izgled aplikacije (HTML + CSS). Dovršite aplikaciju prema uputama ispod. Dozvoljenja je promjena i dodavanje HTML i CSS dijelova (ne brisanje!)
+
+## Novi zaposleník
+
+Kroz sučelje je potrebno unijeti podatke o novom zaposleniku – **ime i prezime, email adresu, godinu rođenja, kolegij i status** (redovni/vanzredni). Ime i prezime skupna ne smiju biti kraće od **6 znakova**, email mora imati znak '@'. Svi podaci moraju biti uneseni. Redovni student mora imati godinu rođenja >1990. (Grešku ispišite u <p> element sa id=„greska")
+
+Prije slanja zahtjeva trebno je izračunati broj bodova koje student nosi za prijavu – osnovna plača ovisi o kolegiju (Informatika: 50€, ostali: 100€). Ako je kolegij Informatika, povećava se ukupan broj bodova za 5%. Ako student ima status redovnog studenta, dodaje se 10 dodatnih bodova, ako je kolegij informatika, povećava se broj bodova za 5%.
+
+Nakon unosa svih podataka, pritiskom na tipku „Dodaj" trebno je poslati **POST zahtjev** na adresu http://<ip-adresa>:4000/studenti (ne smije se slati ako provjere nisu dobre).
+Format JSON podatka kojeg poslužitelj prihvaća možete vidjeti na slici (i poslužitelju)
+
+Nakon slanja podatka, očistite podatke sa forme.
+
+## Učitaj zapis
+
+Kroz sučelje je potrebno unijeti podatak za pretrežvanje zaposlenika. Pritiskom na tipku „Pretraži" trebno je poslati **GET zahtjev** http://<ip-adresa>:4000/studenti sa parametrom „kolegiji" i „godinaRođenja".
+
+Poslužitelj kao odgovor vraća niz sa svim zaposlenicima na traženom poziciji stariji od tražene godine u JSON obliku.
+
+Kada dohvatanja podataka trebno ih je prikazati na sučelje, primjer možete vidjeti na slici (ne mora biti identičan)
+
+ID se automatski dodaje na poslužitelju.
+
+---
+---
+
+## 📄 **GRUPA_C_NOVI_SPORTAŠ.md**
+
+````markdown
+# Grupa C - Novi sportaš
+
+Sa stranice kolegija preuzimite datoteku `"GrupaC.zip"` i otpakurajte arhivu na računalo. U datoteci se nalazi početni izgled aplikacije (HTML + CSS). Dovršite aplikaciju prema uputama ispod. Dozvoljenja je promjena i dodavanje HTML i CSS dijelova (ne brisanje!)
+
+## Novi sportaš
+
+Kroz sučelje je potrebno unijeti podatke o novom sportašu – **ime i prezime, email adresu, godinu rođenja, sport i status** (profesionalac/amateri). Ime i prezime skupna ne smiju biti kraće od **5 znakova**, email mora imati znak '@'. Svi podaci moraju biti uneseni. Profesionalni sportaš mora imati godinu rođenja 1980-2005. (Grešku ispišite u <p> element sa id=„greska")
+
+Prije slanja zahtjeva trebno je izračunati broj treninga tjedno po sportu – osnovna plača danu ovisi o sportu (nogomет: 4, tenis: 3, plivanje: 5). Ako je sportaš profesionalan i njegov se 2 dodatna treninga na osnovni, a ako je sport plivanje se povećava dodat 10%.
+
+Nakon unosa svih podataka, pritiskom na tipku „Dodaj" trebno je poslati **POST zahtjev** na adresu http://<ip-adresa>:4000/sportasi (ne smije se slati ako provjere nisu dobre).
+Format JSON podatka kojeg poslužitelj prihvaća možete vidjeti na slici (i poslužitelju)
+
+Nakon slanja podatka, očistite podatke sa forme.
+
+## Učitaj zapis
+
+Kroz sučelje je potrebno unijeti podatak za pretrežvanje sportaša. Pritiskom na tipku „Pretraži" trebno je poslati **GET zahtjev** http://<ip-adresa>:4000/sportasi sa parametrom „sport".
+
+Poslužitelj kao odgovor vraća niz sa svim sportašima u traženom sportu stariji od tražene godine u JSON obliku.
+
+Kada dohvatanja podataka trebno ih je prikazati na sučelje, primjer možete vidjeti na slici (ne mora biti identičan)
+
+ID se automatski dodaje na poslužitelju.
+
+---
+## 📄 **3_ISPITNI_ROK_KONCERT.md**
+
+````markdown
+# 3. Ispitni rok - Koncert
+
+Sa stranice kolegija preuzimite datoteku `"grupaA.zip"` i otpakurajte arhivu na računalo. U datoteci se nalazi početni izgled aplikacije (HTML + CSS). Dovršite aplikaciju prema uputama ispod. Dozvoljenja je promjena i dodavanje HTML i CSS dijelova (ne brisanje!)
+
+## Unos podatka
+
+Kroz sučelje je potrebno unijeti podatke o novom koncertu – **izvođač, trajanje u minutama, pozicija sjedala (radio buttoni)**. Izvođač nije biti kraći od **3 znaka**.
+
+Pritiskom unosa trebino je izračunati cijenu karte – cijena ovisi o poziciji sjedala (VIP (10€), Regular (5€), FanPit (2€)) + dodatnih 5€ ako je trajanje **veće od 100 minuta**.
+
+Format JSON podatka kojeg poslužitelj prihvaća možete vidjeti na slici (i poslužitelju)
+
+Nakon slanja zahtjeva trebno je izbrisati vrijednosti iz forme.
+
+## Prikaz podataka
+
+Pritiskom na tipku „Dohvati" trebno je poslati **GET zahtjev** na http://<ip-adresa>:4000/koncert.
+
+Poslužitelj kao odgovor vraća niz sa svim kartama i trebam izračunati cijenu karte – cijena ovisi o poziciji sjedala i kojih dužine koncerta i brojati koliko je VIP sjedala.
+
+Prikazati podatke o naraždbama u numeriranoj listi u formatu „**sjedalo – ime**", gdje narudžbi te broj narudžbi koji je VIP poziciji.
+
+---
+
