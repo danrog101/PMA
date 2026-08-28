@@ -774,3 +774,301 @@ document.getElementById("Spremi").addEventListener("click", (e) => {
 ```
 
 **Napomena:** `toFixed(2)` — kod zbrajanja decimalnih brojeva JS zna vratiti `11.190000000000001`; `toFixed(2)` zaokruži na 2 decimale.
+
+# Grupa B - Novi zaposleník - RJEŠENJE
+
+```javascript
+// ===== DODAJ NOVOG ZAPOSLENIKA =====
+document.getElementById("dodaj").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // RECENICA 1: Unosi se ime, prezime, email, godina, kolegij, status
+  const ime = document.getElementById("ime").value.trim();
+  const prezime = document.getElementById("prezime").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const godina = Number(document.getElementById("godina").value);
+  const kolegij = document.getElementById("kolegij").value;
+  const status = document.querySelector('input[name="status"]:checked').value;
+
+  // RECENICA 2: Ime i prezime skupna ne smiju biti kraće od 6 znakova
+  if ((ime + prezime).length < 6) {
+    alert("Ime i prezime skupna moraju biti najmanje 6 znakova!");
+    return;
+  }
+
+  // Email mora imati @
+  if (!email.includes("@")) {
+    alert("Email mora sadržavati @");
+    return;
+  }
+
+  // Godina mora biti > 1990
+  if (godina <= 1990) {
+    alert("Godina rođenja mora biti veća od 1990!");
+    return;
+  }
+
+  // RECENICA 3: Izračunaj broj bodova prema kolegiju
+  let bodovi = 0;
+  if (kolegij === "Informatika") {
+    bodovi = 63 * 0.05; // 5% dodatnih bodova
+  } else {
+    bodovi = 63;
+  }
+
+  // Ako je redovni student, dodaj 10 bodova
+  if (status === "redovni") {
+    bodovi += 10;
+  }
+
+  // RECENICA 4: POST zahtjev sa svim podacima
+  const zaposleník = {
+    ime: ime,
+    prezime: prezime,
+    email: email,
+    godinaRođenja: godina,
+    kolegiji: [kolegij],
+    bodovi: bodovi,
+    statusRedovni: status === "redovni" ? true : false,
+    prijave: []
+  };
+
+  fetch("http://localhost:4000/studenti", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(zaposleník)
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("Zaposleník dodan!");
+      // Očisti formu
+      document.getElementById("ime").value = "";
+      document.getElementById("prezime").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("godina").value = "";
+      // Osvježi popis
+      document.getElementById("pretraži").click();
+    })
+    .catch(err => console.log(err));
+});
+
+// ===== PRETRAŽI ZAPOSLENIKE =====
+document.getElementById("pretraži").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // RECENICA 5: GET zahtjev sa parametrima kolegiji i godinaRođenja
+  const kolegij = document.getElementById("filterKolegij").value;
+  const godinaRođenja = document.getElementById("filterGodina").value;
+
+  fetch(`http://localhost:4000/studenti?kolegiji=${kolegij}&godinaRođenja=${godinaRođenja}`)
+    .then(res => res.json())
+    .then(data => {
+      let html = "";
+      data.forEach(z => {
+        html += `<li>${z.ime} ${z.prezime} - Bodovi: ${z.bodovi}</li>`;
+      });
+      document.getElementById("rezultat").innerHTML = `<ul>${html}</ul>`;
+    })
+    .catch(err => console.log(err));
+});
+```
+# Grupa C - Novi sportaš - RJEŠENJE
+
+```javascript
+// ===== DODAJ NOVOG SPORTAŠA =====
+document.getElementById("dodaj").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // RECENICA 1: Unosi se ime, prezime, email, godina, sport, status
+  const ime = document.getElementById("ime").value.trim();
+  const prezime = document.getElementById("prezime").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const godina = Number(document.getElementById("godina").value);
+  const sport = document.getElementById("sport").value;
+  const status = document.querySelector('input[name="statusSportasa"]:checked').value;
+
+  // RECENICA 2: Ime i prezime skupna ne smiju biti kraće od 5 znakova
+  if ((ime + prezime).length < 5) {
+    alert("Ime i prezime skupna moraju biti najmanje 5 znakova!");
+    return;
+  }
+
+  // Email mora imati @
+  if (!email.includes("@")) {
+    alert("Email mora sadržavati @");
+    return;
+  }
+
+  // Godina mora biti između 1980 i 2005
+  if (godina < 1980 || godina > 2005) {
+    alert("Godina rođenja mora biti između 1980 i 2005!");
+    return;
+  }
+
+  // RECENICA 3: Izračunaj broj treninga
+  let treningo = 0;
+  if (sport === "nogomет") treningo = 4;
+  else if (sport === "tenis") treningo = 3;
+  else if (sport === "plivanje") treningo = 5;
+
+  // Ako je profesionalan, dodaj 2 treninga
+  if (status === "profesionalan") {
+    treningo += 2;
+  }
+
+  // Ako je plivanje, dodaj 10%
+  if (sport === "plivanje") {
+    treningo = treningo + (treningo * 0.10);
+  }
+
+  // RECENICA 4: POST zahtjev sa svim podacima
+  const sportaš = {
+    ime: ime,
+    prezime: prezime,
+    email: email,
+    godinaRođenja: godina,
+    sport: sport,
+    statusProfesionalni: status === "profesionalan" ? true : false,
+    planTreninga: {
+      treninziTjedno: treningo,
+      sport: sport
+    }
+  };
+
+  fetch("http://localhost:4000/sportasi", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(sportaš)
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("Sportaš dodan!");
+      // Očisti formu
+      document.getElementById("ime").value = "";
+      document.getElementById("prezime").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("godina").value = "";
+      // Osvježi popis
+      document.getElementById("pretraži").click();
+    })
+    .catch(err => console.log(err));
+});
+
+// ===== PRETRAŽI SPORTAŠE =====
+document.getElementById("pretraži").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // RECENICA 5: GET zahtjev sa parametrom sport
+  const sport = document.getElementById("filterSport").value;
+
+  fetch(`http://localhost:4000/sportasi?sport=${sport}`)
+    .then(res => res.json())
+    .then(data => {
+      let html = "";
+      data.forEach(s => {
+        html += `<li>${s.ime} ${s.prezime} - Sport: ${s.sport} - Treningo/tjednu: ${s.planTreninga.treninziTjedno}</li>`;
+      });
+      document.getElementById("rezultat").innerHTML = `<ul>${html}</ul>`;
+    })
+    .catch(err => console.log(err));
+});
+```
+# 3. Ispitni rok - Koncert - RJEŠENJE
+
+```javascript
+// ===== DODAJ NOVU KARTU =====
+document.getElementById("spremi").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // RECENICA 1: Unosi se izvođač, datum (Date objekt!) i pozicija sjedala
+  const izvođač = document.getElementById("izvođač").value.trim();
+  const datum = new Date().toLocaleDateString("hr-HR"); // Automatski DATUM!
+  const trajanje = Number(document.getElementById("trajanje").value);
+  let pozicija;
+  if (document.getElementById("vip").checked) pozicija = "vip";
+  else if (document.getElementById("regular").checked) pozicija = "regular";
+  else if (document.getElementById("fanpit").checked) pozicija = "fanpit";
+
+  // RECENICA 2: Izvođač ne smije biti kraći od 3 znaka
+  if (izvođač.length < 3) {
+    alert("Izvođač mora imati najmanje 3 znaka!");
+    return;
+  }
+
+  // Datum mora biti definiran
+  if (!datum) {
+    alert("Datum nije definiran!");
+    return;
+  }
+
+  // RECENICA 3: Izračunaj cijenu po poziciji + dodatak ako je trajanje > 100 minuta
+  let cijena = 0;
+  if (pozicija === "vip") cijena = 10;
+  else if (pozicija === "regular") cijena = 5;
+  else if (pozicija === "fanpit") cijena = 2;
+
+  // Ako je trajanje > 100 minuta, dodaj 5€
+  if (trajanje > 100) {
+    cijena += 5;
+  }
+
+  // RECENICA 4: POST zahtjev sa svim podacima
+  const karta = {
+    cijena: cijena,
+    datum: datum,
+    detalji: {
+      ime: izvođač,
+      sjedalo: pozicija,
+      trajanje: trajanje
+    }
+  };
+
+  fetch("http://localhost:4000/koncert", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(karta)
+  })
+    .then(res => res.text())
+    .then(msg => {
+      alert(msg);
+      // Očisti formu nakon uspješnog slanja
+      document.getElementById("izvođač").value = "";
+      document.getElementById("trajanje").value = "";
+      document.getElementById("regular").checked = true;
+      // Osvježi popis
+      document.getElementById("dohvati").click();
+    })
+    .catch(err => console.log(err));
+});
+
+// ===== DOHVATI SVE KARTE =====
+document.getElementById("dohvati").addEventListener("click", (e) => {
+  e.preventDefault();
+
+  // RECENICA 5: GET zahtjev za sve karte
+  fetch("http://localhost:4000/koncert")
+    .then(res => res.json())
+    .then(data => {
+      // Prikaži sve karte u listi
+      const lista = document.createElement("ol");
+      let suma = 0;
+      let brojVIP = 0;
+
+      data.forEach(karta => {
+        suma += karta.cijena;
+        if (karta.detalji.sjedalo === "vip") brojVIP++;
+
+        const li = document.createElement("li");
+        li.innerText = `${karta.detalji.sjedalo[0].toUpperCase()} - ${karta.detalji.ime}`;
+        lista.appendChild(li);
+      });
+
+      document.getElementById("popis").innerHTML = "";
+      document.getElementById("popis").appendChild(lista);
+
+      document.getElementById("suma").innerText = suma + " €";
+      document.getElementById("brojVIP").innerText = brojVIP;
+    })
+    .catch(err => console.log(err));
+});
+```
