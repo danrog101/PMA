@@ -316,4 +316,259 @@ Poslužitelj kao odgovor vraća niz sa svim kartama i trebam izračunati cijenu 
 Prikazati podatke o naraždbama u numeriranoj listi u formatu „**sjedalo – ime**", gdje narudžbi te broj narudžbi koji je VIP poziciji.
 
 ---
+## 1. ROK - Vinarija (GET + PUT)
+
+### Opis Zadatka
+
+Aplikacija za upravljanje bazom vina. Korisnik unese ID vina, učitaju se podatci sa servera, može ih ažurirati i poslati natrag.
+
+### Što Trebam Raditi
+
+**Učitaj Zapis:**
+- Korisnik unese ID vina (npr. 15)
+- Aplikacija šalje GET zahtjev na: `http://localhost:4000/vino/<id>`
+- Server vraća:
+  - Status 204 (No Content) ako zapis ne postoji
+  - Status 200 sa JSON podacima ako postoji
+- Ako postoji, prikazuju se podaci u formi:
+  - ID (fiksno, ne može se mijenjati)
+  - Ime vina
+  - Vrsta vina
+  - Godina proizvodnje
+  - Naziv proizvodača
+  - Organsko vino (checkbox)
+
+**Ažuriraj Zapis:**
+- Korisnik može mijenjati sve podatke osim ID-a
+- Klikne "Ažuriraj" button
+- Aplikacija šalje PUT zahtjev sa novim podacima
+- Server ažurira podatke u bazi
+- Prikazuje se poruka "Ažurirano!"
+
+### JSON Format - Server
+
+```json
+{
+  "id": 2,
+  "ime": "Merlot",
+  "vinog": "Crno vino",
+  "godinaProizvodnje": 2019,
+  "nazivProizvodaca": "Vinarija Stari Grad",
+  "organsko": false
+}
+```
+
+### Validacija
+
+- Svi podaci su obavezni
+- ID se ne može mijenjati
+- Status 204 znači da zapis ne postoji
+
+### Datoteka
+
+`vinarija-1rok.js`
+
+---
+
+## Grupa A - Keramika (GET + PUT)
+
+### Opis Zadatka
+
+Aplikacija za upravljanje kursevima keramike. Učitaj podatke kursa po ID-u, ažuriraj informacije i pošalji na server.
+
+### Što Trebam Raditi
+
+**Učitaj Zapis:**
+- Korisnik unese ID kursa (npr. 5)
+- Aplikacija šalje GET zahtjev na: `http://localhost:4000/keramika/<id>`
+- Server vraća:
+  - Status 204 ako kurs ne postoji
+  - Status 200 sa JSON ako postoji
+- Prikazuju se podaci:
+  - ID (fiksno)
+  - Ime kursa (npr. "Keramika za djecu")
+  - Nivo (početni/srednji/napredniji)
+  - Trajanje u tjednima
+  - Naziv predavača
+  - Iskustvo predavača (godine)
+
+**Ažuriraj Zapis:**
+- Korisnik mijenja podatke
+- Validacija: Iskustvo mora biti najmanje 5 godina
+- Klikne "Ažuriraj"
+- PUT zahtjev sa novim podacima
+- Materijali se automatski dodaju kao `true`
+- Poruka "Ažurirano!"
+
+### JSON Format - Server
+
+```json
+{
+  "id": 5,
+  "ime": "Keramika za djecu",
+  "nivo": "početni",
+  "trajanjeTjedana": 5,
+  "nazivPredavača": "Marina Jurković",
+  "iskustvoGodina": 6,
+  "materijali": true
+}
+```
+
+### Validacija
+
+- Svi podaci obavezni
+- Iskustvo 5+ godina
+- ID se ne može mijenjati
+
+### Datoteka
+
+`keramika-grupaA.js`
+
+---
+
+## Grupa B - Novi Zaposlenik (POST)
+
+### Opis Zadatka
+
+Dodaj novog zaposlenika u bazu. Unesi podatke, aplikacija izračuna bodove na osnovu kolegija i statusa, i pošalje na server.
+
+### Što Trebam Raditi
+
+**Unos Podataka:**
+- Ime i prezime (skupno 6+ znakova)
+- Email (mora sadržavati @)
+- Godina rođenja (>1990 za redovne studente)
+- Kolegij (select: Informatika, Matematika, Fizika)
+- Status (radio: Redovni/Vanredni)
+
+**Izračun Bodova:**
+- Matematika: 50 bodova
+- Informatika: 50 bodova
+- Fizika: 30 bodova
+- Ako je Informatika: +5% na bodove
+- Ako je Redovni: +10 dodatnih bodova
+
+**Primjeri:**
+- Marko, Informatika, Redovni = 50 + 2.5 + 10 = 62.5 bodova
+- Ana, Matematika, Vanredna = 50 bodova
+- Petar, Fizika, Redovni = 30 + 10 = 40 bodova
+
+**POST Zahtjev:**
+- Pošalji na: `http://localhost:4000/studenti`
+- Očisti formu nakon uspjeha
+
+### JSON Format - Server
+
+```json
+{
+  "ime": "Marko",
+  "prezime": "Marić",
+  "email": "marko@pmfst.hr",
+  "godinaRođenja": 1995,
+  "kolegiji": ["informatika"],
+  "bodovi": 62.5,
+  "statusRedovni": true
+}
+```
+
+### Validacija
+
+- Ime + prezime 6+ znakova
+- Email sa @
+- Redovni studenti trebaju biti rođeni nakon 1990
+- Svi podaci obavezni
+
+### Datoteka
+
+`student-grupaB.js`
+
+---
+
+## Grupa C - Novi Sportaš (POST)
+
+### Opis Zadatka
+
+Dodaj novog sportaša u bazu. Unesi podatke, aplikacija izračuna broj treninga po tjednu, i pošalje na server.
+
+### Što Trebam Raditi
+
+**Unos Podataka:**
+- Ime i prezime (skupno 5+ znakova)
+- Email (mora sadržavati @)
+- Godina rođenja (1980-2005 za profesionalce)
+- Sport (select: Nogomět, Tenis, Plivanje)
+- Status (radio: Profesionalan/Amater)
+
+**Izračun Treninga po Tjednu:**
+- Nogomět: 4 treninga
+- Tenis: 3 treninga
+- Plivanje: 5 treninga
+- Ako je Profesionalan: +2 treninga
+- Ako je Plivanje: +10% na treninge
+
+**Primjeri:**
+- Marko, Nogomět, Profesionalan = 4 + 2 = 6 treninga/tjedno
+- Ana, Plivanje, Profesionalna = 5 + 2 + 10% = 7.7 treninga/tjedno
+- Petar, Tenis, Amater = 3 treninga/tjedno
+
+**POST Zahtjev:**
+- Pošalji na: `http://localhost:4000/sportasi`
+- Očisti formu nakon uspjeha
+
+### JSON Format - Server
+
+```json
+{
+  "ime": "Marko",
+  "prezime": "Marić",
+  "email": "marko@example.com",
+  "godinaRođenja": 1995,
+  "sport": "plivanje",
+  "statusProfesionalni": true,
+  "planTreninga": {
+    "treninziTjedno": 7.7,
+    "sport": "plivanje"
+  }
+}
+```
+
+### Validacija
+
+- Ime + prezime 5+ znakova
+- Email sa @
+- Profesionalni sportaši trebaju biti rođeni 1980-2005
+- Svi podaci obavezni
+
+### Datoteka
+
+`sportas-grupaC.js`
+
+---
+
+## 🚀 Kako Koristiti
+
+### Instalacija
+
+1. Preuzmi sve `.js` datoteke
+2. Uključi u HTML file:
+
+```html
+<script src="vinarija-1rok.js"></script>
+<script src="keramika-grupaA.js"></script>
+<script src="student-grupaB.js"></script>
+<script src="sportas-grupaC.js"></script>
+```
+
+### Prilagodba
+
+Prilagodi ID-eve HTML inputa prema svojoj HTML strukturi:
+
+```javascript
+// Primjer - zamijeni sa svojim ID-evima
+const id = document.getElementById('id_unos').value;
+const ime = document.getElementById('ime').value;
+```
+
+### Server
+
 
