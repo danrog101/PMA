@@ -1072,3 +1072,269 @@ document.getElementById("dohvati").addEventListener("click", (e) => {
     .catch(err => console.log(err));
 });
 ```
+// =====================================================
+// VINARIJA - 1. ROK (GET + PUT)
+// =====================================================
+// Učitaj podatke vina po ID-u, ažuriraj i pošalji na server
+
+// UČITAJ ZAPIS - GET sa ID-om
+document.getElementById('ucitaj').addEventListener('click', (e) => {
+  e.preventDefault();
+  
+  const idEl = document.getElementById('id_unos');
+  const id = idEl.value.trim();
+  
+  // Validacija
+  if(!id) {
+    alert("Trebam ID vina!");
+    idEl.style.border = "2px solid red";
+    return;
+  }
+  
+  idEl.style.border = "2px solid black";
+  
+  // ✅ GET zahtjev - Dohvati podatke vina
+  fetch(`http://localhost:4000/vino/${id}`)
+    .then(res => {
+      // Status 204 = Nema sadržaja (vino ne postoji)
+      if(res.status === 204) {
+        alert("❌ Ne postoji podatak sa ovim ID-om!");
+        return null;
+      }
+      return res.json();
+    })
+    .then(data => {
+      if(!data) return;
+      
+      // ✅ Prikaži podatke u formi
+      document.getElementById('id_rez').value = data.id;
+      document.getElementById('ime').value = data.ime;
+      document.getElementById('vinog').value = data.vinog;
+      document.getElementById('godina').value = data.godinaProizvodnje;
+      document.getElementById('proizvodac').value = data.nazivProizvodaca;
+      document.getElementById('organsko').checked = data.organsko;
+      
+      // Zabrani mijenjanje ID-a
+      document.getElementById('id_rez').disabled = true;
+      document.getElementById('id_rez').style.backgroundColor = "#e0e0e0";
+      
+      console.log("✅ Podaci učitani:", data);
+    })
+    .catch(err => {
+      console.log("❌ Greška pri učitavanju:", err);
+      alert("Došlo je do greške!");
+    });
+});
+
+// AŽURIRAJ ZAPIS - PUT
+document.getElementById('azuriraj').addEventListener('click', (e) => {
+  e.preventDefault();
+  
+  // Dohvati podatke iz forme
+  const id = document.getElementById('id_rez').value;
+  const imeEl = document.getElementById('ime');
+  const ime = imeEl.value.trim();
+  
+  const vinogEl = document.getElementById('vinog');
+  const vinog = vinogEl.value.trim();
+  
+  const godEl = document.getElementById('godina');
+  const godina = parseInt(godEl.value);
+  
+  const prodEl = document.getElementById('proizvodac');
+  const proizvodac = prodEl.value.trim();
+  
+  const organsko = document.getElementById('organsko').checked;
+  
+  // ✅ VALIDACIJA
+  if(!ime) {
+    imeEl.style.border = "2px solid red";
+    alert("Trebam ime vina!");
+    return;
+  }
+  imeEl.style.border = "2px solid black";
+  
+  if(!vinog) {
+    vinogEl.style.border = "2px solid red";
+    alert("Trebam vrstu vina!");
+    return;
+  }
+  vinogEl.style.border = "2px solid black";
+  
+  if(!godina || isNaN(godina)) {
+    godEl.style.border = "2px solid red";
+    alert("Trebam validnu godinu!");
+    return;
+  }
+  godEl.style.border = "2px solid black";
+  
+  if(!proizvodac) {
+    prodEl.style.border = "2px solid red";
+    alert("Trebam naziv proizvodača!");
+    return;
+  }
+  prodEl.style.border = "2px solid black";
+  
+  // ✅ PUT zahtjev - Ažuriraj podatke
+  fetch(`http://localhost:4000/vino/${id}`, {
+    method: "PUT",
+    headers: { 
+      "Content-Type": "application/json" 
+    },
+    body: JSON.stringify({
+      id: parseInt(id),
+      ime: ime,
+      vinog: vinog,
+      godinaProizvodnje: godina,
+      nazivProizvodaca: proizvodac,
+      organsko: organsko
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("✅ Vino uspješno ažurirano!");
+      console.log("Ažurirani podaci:", data);
+    })
+    .catch(err => {
+      console.log("❌ Greška pri ažuriranju:", err);
+      alert("Došlo je do greške!");
+    });
+});
+// =====================================================
+// KERAMIKA - GRUPA A (GET + PUT)
+// =====================================================
+// Učitaj podatke kursa po ID-u, ažuriraj i pošalji na server
+
+// UČITAJ ZAPIS - GET sa ID-om
+document.getElementById('ucitaj').addEventListener('click', (e) => {
+  e.preventDefault();
+  
+  const idEl = document.getElementById('id_unos');
+  const id = idEl.value.trim();
+  
+  // Validacija
+  if(!id) {
+    alert("Trebam ID kursa!");
+    idEl.style.border = "2px solid red";
+    return;
+  }
+  
+  idEl.style.border = "2px solid black";
+  
+  // ✅ GET zahtjev - Dohvati podatke kursa
+  fetch(`http://localhost:4000/keramika/${id}`)
+    .then(res => {
+      // Status 204 = Nema sadržaja (kurs ne postoji)
+      if(res.status === 204) {
+        alert("❌ Ne postoji podatak sa ovim ID-om!");
+        return null;
+      }
+      return res.json();
+    })
+    .then(data => {
+      if(!data) return;
+      
+      // ✅ Prikaži podatke u formi
+      document.getElementById('id_rez').value = data.id;
+      document.getElementById('ime').value = data.ime;
+      document.getElementById('nivo').value = data.nivo;
+      document.getElementById('trajanje').value = data.trajanjeTjedana;
+      document.getElementById('predavac').value = data.nazivPredavaca;
+      document.getElementById('iskustvo').value = data.iskustvoGodina;
+      
+      // Zabrani mijenjanje ID-a
+      document.getElementById('id_rez').disabled = true;
+      document.getElementById('id_rez').style.backgroundColor = "#e0e0e0";
+      
+      console.log("✅ Podaci učitani:", data);
+    })
+    .catch(err => {
+      console.log("❌ Greška pri učitavanju:", err);
+      alert("Došlo je do greške!");
+    });
+});
+
+// AŽURIRAJ ZAPIS - PUT
+document.getElementById('azuriraj').addEventListener('click', (e) => {
+  e.preventDefault();
+  
+  // Dohvati podatke iz forme
+  const id = document.getElementById('id_rez').value;
+  
+  const imeEl = document.getElementById('ime');
+  const ime = imeEl.value.trim();
+  
+  const nivoEl = document.getElementById('nivo');
+  const nivo = nivoEl.value.trim();
+  
+  const trajanjeEl = document.getElementById('trajanje');
+  const trajanje = parseInt(trajanjeEl.value);
+  
+  const predEl = document.getElementById('predavac');
+  const predavac = predEl.value.trim();
+  
+  const iskEl = document.getElementById('iskustvo');
+  const iskustvo = parseInt(iskEl.value);
+  
+  // ✅ VALIDACIJA
+  if(!ime) {
+    imeEl.style.border = "2px solid red";
+    alert("Trebam ime kursa!");
+    return;
+  }
+  imeEl.style.border = "2px solid black";
+  
+  if(!nivo) {
+    nivoEl.style.border = "2px solid red";
+    alert("Trebam nivo kursa!");
+    return;
+  }
+  nivoEl.style.border = "2px solid black";
+  
+  if(!trajanje || isNaN(trajanje)) {
+    trajanjeEl.style.border = "2px solid red";
+    alert("Trebam validno trajanje!");
+    return;
+  }
+  trajanjeEl.style.border = "2px solid black";
+  
+  if(!predavac) {
+    predEl.style.border = "2px solid red";
+    alert("Trebam naziv predavača!");
+    return;
+  }
+  predEl.style.border = "2px solid black";
+  
+  if(iskustvo < 5) {
+    iskEl.style.border = "2px solid red";
+    alert("❌ Iskustvo mora biti najmanje 5 godina!");
+    return;
+  }
+  iskEl.style.border = "2px solid black";
+  
+  // ✅ PUT zahtjev - Ažuriraj podatke
+  fetch(`http://localhost:4000/keramika/${id}`, {
+    method: "PUT",
+    headers: { 
+      "Content-Type": "application/json" 
+    },
+    body: JSON.stringify({
+      id: parseInt(id),
+      ime: ime,
+      nivo: nivo,
+      trajanjeTjedana: trajanje,
+      nazivPredavaca: predavac,
+      iskustvoGodina: iskustvo,
+      materijali: true  // Automatski
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert("✅ Kurs uspješno ažuriran!");
+      console.log("Ažurirani podaci:", data);
+    })
+    .catch(err => {
+      console.log("❌ Greška pri ažuriranju:", err);
+      alert("Došlo je do greške!");
+    });
+});
