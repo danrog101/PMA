@@ -10,19 +10,17 @@ Rješenja idu uz [zadaci.md](zadaci.md). Za objašnjenja vidi [sablone_kompletno
 
 ```javascript
 // Stvaramo NUMERIRANU listu <ol> unutar #lista
-// (li unutar div-a se ne numerira - brojevi dolaze od <ol>)
 const ol = document.createElement("ol");
 document.getElementById("lista").appendChild(ol);
 
 // ===== DODAVANJE REZERVACIJE U POPIS =====
 document.getElementById("dodaj").addEventListener("click", (e) => {
-  e.preventDefault(); // gumb je u formi - sprijeci submit/refresh
+  e.preventDefault();
 
   const prezime = document.getElementById("prezime").value.trim();
   const cijena = parseFloat(document.getElementById("cijena").value);
   const kolicina = parseInt(document.getElementById("kolicina").value);
 
-  // --- provjere unosa (isNaN je bitan jer prazan unos daje NaN!) ---
   if (prezime.length < 3) {
     alert("Prezime mora imati najmanje 3 znaka!");
     return;
@@ -36,16 +34,13 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
     return;
   }
 
-  // ukupna cijena = broj karata x pojedinacna cijena
   const ukupno = cijena * kolicina;
 
-  // <li> element - podatke spremamo u dataset za lako citanje kod slanja
   const li = document.createElement("li");
   li.dataset.prezime = prezime;
   li.dataset.ukupno = ukupno;
   li.textContent = `${prezime} - ${ukupno}kn `;
 
-  // gumb za uklanjanje samo te rezervacije
   const ukloniBtn = document.createElement("button");
   ukloniBtn.textContent = "Ukloni";
   ukloniBtn.addEventListener("click", () => {
@@ -55,7 +50,6 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
   li.appendChild(ukloniBtn);
   ol.appendChild(li);
 
-  // ocisti polja za unos
   document.getElementById("prezime").value = "";
   document.getElementById("cijena").value = "";
   document.getElementById("kolicina").value = "";
@@ -71,7 +65,6 @@ document.getElementById("spremi").addEventListener("click", (e) => {
     return;
   }
 
-  // gradimo niz rezervacija iz dataset podataka
   const rezervacije = [];
   lis.forEach((li) => {
     rezervacije.push({
@@ -83,14 +76,12 @@ document.getElementById("spremi").addEventListener("click", (e) => {
   fetch("http://localhost:4000/karte", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ rezervacije: rezervacije }), // server trazi kljuc "rezervacije"
+    body: JSON.stringify({ rezervacije: rezervacije }),
   })
     .then((res) => res.json())
     .then((data) => {
-      // nakon uspjesnog slanja brisemo sve rezervacije iz popisa
       ol.innerHTML = "";
 
-      // statistika ISKLJUCIVO iz odgovora servera
       let brojOsoba = 0;
       let suma = 0;
       data.forEach((el) => {
@@ -110,15 +101,13 @@ document.getElementById("spremi").addEventListener("click", (e) => {
 });
 ```
 
-**Napomene:** ovdje je "lokalno spremište" sama lista u HTML-u (podaci u `li.dataset`), umjesto niza u varijabli — obje varijante su ok jer zadatak kaže "logika lokalnog spremanja po želji". Statistika ima if/else jer server može vraćati dva oblika odgovora (niz nizova ili niz objekata).
-
 ---
 
 ## 2. Aviokarte (TIP A)
 
 ```javascript
 document.getElementById('btnSpremi').addEventListener('click', function(e) {
-    e.preventDefault(); // Sprječava refresh forme
+    e.preventDefault();
 
     let ime = document.getElementById('ime').value.trim();
     let klasa;
@@ -149,12 +138,12 @@ document.getElementById('btnSpremi').addEventListener('click', function(e) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(podaci)
     })
-    .then(res => res.text()) // uvijek dohvaća tekst koji server vraća
+    .then(res => res.text())
     .then(data => {
-        alert(data); // npr. "Objekt je spremljen"
+        alert(data);
         document.getElementById('ime').value = '';
         document.getElementById('prtljaga').checked = false;
-        document.getElementById('e').checked = true; // resetira klasu
+        document.getElementById('e').checked = true;
     })
     .catch(err => {
         console.error(err);
@@ -166,7 +155,7 @@ document.getElementById('dohvatiSve').addEventListener('click', function(e) {
     e.preventDefault();
 
     fetch("http://localhost:4000/karte")
-    .then(res => res.json()) // dohvat podataka u JSON obliku
+    .then(res => res.json())
     .then(data => {
         let lista = document.createElement('ul');
         let suma = 0;
@@ -199,8 +188,6 @@ document.getElementById('dohvatiSve').addEventListener('click', function(e) {
 
 ## 3. Mobitel — POST varijanta (TIP A)
 
-*(Verzija s alert validacijom; u komentarima označeno gdje bi išli crveni okviri koje zadatak zapravo traži.)*
-
 ```javascript
 document.getElementById("posalji").addEventListener("click", (e) => {
   e.preventDefault();
@@ -208,37 +195,26 @@ document.getElementById("posalji").addEventListener("click", (e) => {
   const model = document.getElementById("model").value.trim();
   const serial = document.getElementById("serial").value.trim();
   const vlasnik = document.getElementById("vlasnik").value.trim();
-  const petG = document.getElementById("petG").checked; // boolean!
+  const petG = document.getElementById("petG").checked;
 
-  // --- provjere (alert + return, bez bordera) ---
-
-  // model: ne smije biti prazan niti kraći od 3 znaka
   if (model.length < 3) {
     alert("Model mora imati najmanje 3 znaka!");
     return;
-    // *** BORDER VERZIJA: umjesto alert+return:
-    //     document.getElementById("model").style.border = "2px solid red";
-    //     ispravno = false;   (BEZ return - provjeriti i ostala polja!)
-    // *** i else grana: style.border = ""
   }
 
-  // serijski broj: cijeli broj, TOČNO 6 znamenki
   if (serial === "" || serial.length !== 6 || isNaN(serial)) {
     alert("Serijski broj mora biti cijeli broj od točno 6 znamenki!");
     return;
   }
 
-  // vlasnik: ne smije biti prazan
   if (vlasnik === "") {
     alert("Ime vlasnika ne smije biti prazno!");
     return;
-    // *** BORDER VERZIJA: nakon SVIH provjera: if (!ispravno) return;
   }
 
-  // --- objekt u formatu sa slike ---
   const zaServer = {
     model: model,
-    serial: Number(serial), // na slici je serial BROJ, ne string
+    serial: Number(serial),
     vlasnik: vlasnik,
     petG: petG,
   };
@@ -248,16 +224,15 @@ document.getElementById("posalji").addEventListener("click", (e) => {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(zaServer),
   })
-    .then((res) => res.json()) // poslužitelj šalje odgovor u JSON formatu
+    .then((res) => res.json())
     .then((data) => {
       document.getElementById("odgovor").innerText = JSON.stringify(data);
-      // automatski ažuriraj popis: programski klik na "Učitaj"!
       document.getElementById("ucitaj").click();
     })
     .catch((err) => console.log("Greška kod slanja:", err));
 });
 
-// ===== BRIŠI (samo čisti formu, bez zahtjeva) =====
+// ===== BRIŠI (samo čisti formu) =====
 document.getElementById("brisi").addEventListener("click", (e) => {
   e.preventDefault();
 
@@ -274,11 +249,10 @@ document.getElementById("ucitaj").addEventListener("click", (e) => {
   fetch("http://localhost:4000/mob/svi")
     .then((res) => res.json())
     .then((data) => {
-      const lista = document.createElement("ol"); // NUMERIRANA lista!
+      const lista = document.createElement("ol");
 
       data.forEach((zahtjev) => {
         const li = document.createElement("li");
-        // format: "Serijski broj - Vlasnik - 5G (ako je 5G)"
         let tekst = zahtjev.serial + " - " + zahtjev.vlasnik;
         if (zahtjev.petG) tekst += " - 5G";
         li.innerText = tekst;
@@ -286,7 +260,7 @@ document.getElementById("ucitaj").addEventListener("click", (e) => {
       });
 
       const rezultatDiv = document.getElementById("rezultat");
-      rezultatDiv.innerHTML = ""; // očisti staru listu
+      rezultatDiv.innerHTML = "";
       rezultatDiv.appendChild(lista);
     })
     .catch((err) => console.log("Greška kod dohvata:", err));
@@ -305,24 +279,22 @@ document.getElementById("ucitaj").addEventListener("click", (e) => {
 
   fetch(`http://localhost:4000/zahtjev/${id}`)
     .then((res) => {
-      // 204 = nema sadržaja, ne smijemo zvati res.json()
       if (res.status === 204) {
         document.getElementById("greska").innerText =
           "Ne postoji podatak sa ovim ID-om";
         return null;
       }
-      document.getElementById("greska").innerText = ""; // očisti staru grešku
+      document.getElementById("greska").innerText = "";
       return res.json();
     })
     .then((data) => {
-      if (!data) return; // bio je 204, ne radimo ništa dalje
+      if (!data) return;
 
       document.getElementById("id_rez").value = data.id;
       document.getElementById("ime").value = data.podaci.vlasnik;
       document.getElementById("serijski").value = data.podaci.broj;
       document.getElementById("popravljen").checked = data.podaci.popravljen;
 
-      // onemogući mijenjanje ID-a (zahtjev zadatka!)
       document.getElementById("id_rez").disabled = true;
     })
     .catch((err) => console.log("Greška:", err));
@@ -335,9 +307,8 @@ document.getElementById("arz").addEventListener("click", (e) => {
   const id = document.getElementById("id_rez").value;
   const vlasnik = document.getElementById("ime").value;
   const serijski = document.getElementById("serijski").value;
-  const popravljen = document.getElementById("popravljen").checked; // boolean!
+  const popravljen = document.getElementById("popravljen").checked;
 
-  // --- provjere prije slanja ---
   if (vlasnik.trim() === "" || serijski.trim() === "") {
     alert("Vlasnik i serijski broj ne smiju biti prazni!");
     return;
@@ -348,7 +319,6 @@ document.getElementById("arz").addEventListener("click", (e) => {
     return;
   }
 
-  // --- podatak u istom obliku kao sa poslužitelja ---
   const zapis = {
     id: Number(id),
     podaci: {
@@ -365,7 +335,6 @@ document.getElementById("arz").addEventListener("click", (e) => {
   })
     .then((res) => res.json())
     .then((svi) => {
-      // server vraća niz SVIH zapisa -> računamo postotak popravljenih
       const ukupno = svi.length;
       const popravljeni = svi.filter(
         (el) => el.podaci.popravljen === true
@@ -382,8 +351,6 @@ document.getElementById("arz").addEventListener("click", (e) => {
 
 ## 5. Popis studenata (GET / GET po id / DELETE, dinamički gumbi)
 
-*(Verzija s funkcijama — čista i pregledna. Za varijantu bez funkcija vidi šablone 8/9 + .click() trik.)*
-
 ```javascript
 // Klik na "Učitaj" - GET svih studenata
 document.getElementById('btnUcitaj').addEventListener('click', (e) => {
@@ -397,10 +364,10 @@ document.getElementById('btnUcitaj').addEventListener('click', (e) => {
         .catch(err => console.log("Greška kod dohvaćanja studenata:", err));
 });
 
-// Funkcija za prikaz osnovnog popisa studenata (ID + ime)
+// Funkcija za prikaz osnovnog popisa studenata
 function prikaziStudente(studenti) {
     const popisUl = document.querySelector('#popis ul');
-    popisUl.innerHTML = ''; // očisti prethodni popis
+    popisUl.innerHTML = '';
 
     studenti.forEach(st => {
         const li = document.createElement('li');
@@ -423,16 +390,14 @@ function prikaziDetalje(id) {
         .then(res => res.json())
         .then(student => {
             const detaljiUl = document.querySelector('#detalji ul');
-            detaljiUl.innerHTML = ''; // očisti prethodne detalje
+            detaljiUl.innerHTML = '';
 
-            // Ispiši sve podatke koje vraća server (i nizove - stringify!)
             for (let key in student) {
                 const li = document.createElement('li');
                 li.textContent = key + ": " + JSON.stringify(student[key]);
                 detaljiUl.appendChild(li);
             }
 
-            // Dodaj gumb za brisanje
             const brisiBtn = document.createElement('button');
             brisiBtn.textContent = 'Briši';
             brisiBtn.addEventListener('click', () => {
@@ -453,10 +418,7 @@ function obrisiStudenta(id) {
     })
         .then(res => res.json())
         .then(preostaliStudenti => {
-            // Očisti detalje
             document.querySelector('#detalji ul').innerHTML = '';
-
-            // Ponovno prikaži popis preostalih studenata
             prikaziStudente(preostaliStudenti);
         })
         .catch(err => console.log("Greška kod brisanja:", err));
@@ -474,33 +436,28 @@ document.getElementById("spremi").addEventListener("click", (e) => {
   const ime = document.getElementById("ime").value.trim();
   const trajanje = Number(document.getElementById("trajanje").value);
 
-  // koja je pozicija sjedala odabrana?
   let sjedalo;
   if (document.getElementById("v").checked) sjedalo = "vip";
   else if (document.getElementById("r").checked) sjedalo = "regular";
   else if (document.getElementById("f").checked) sjedalo = "fanpit";
 
-  // --- datum se MORA dohvatiti pomoću objekta Date (zahtjev zadatka!) ---
-  const datum = new Date().toLocaleDateString("en-US"); // npr. "8/20/2025"
+  const datum = new Date().toLocaleDateString("en-US");
 
-  // --- provjere: ime min 3 znaka, datum mora biti definiran ---
   if (ime.length < 3) {
     alert("Ime mora imati najmanje 3 znaka!");
-    return; // NE šalji zahtjev
+    return;
   }
   if (!datum) {
     alert("Datum nije definiran!");
     return;
   }
 
-  // --- izračun cijene: ovisi o sjedalu + trajanju ---
   let cijena = 0;
   if (sjedalo === "vip") cijena = 10;
   else if (sjedalo === "regular") cijena = 5;
   else if (sjedalo === "fanpit") cijena = 2;
-  if (trajanje > 100) cijena += 5; // dodatnih 5€ ako trajanje > 100 min
+  if (trajanje > 100) cijena += 5;
 
-  // --- objekt u formatu sa slike (BEZ id - server ga dodaje sam!) ---
   const zaServer = {
     cijena: cijena,
     datum: datum,
@@ -518,9 +475,8 @@ document.getElementById("spremi").addEventListener("click", (e) => {
   })
     .then((res) => res.text())
     .then((data) => {
-      alert(data); // poruka od servera
+      alert(data);
 
-      // reset forme
       document.getElementById("ime").value = "";
       document.getElementById("trajanje").value = "";
       document.getElementById("v").checked = true;
@@ -535,7 +491,7 @@ document.getElementById("dohvati").addEventListener("click", (e) => {
   fetch("http://localhost:4000/koncert")
     .then((res) => res.json())
     .then((data) => {
-      const lista = document.createElement("ol"); // NUMERIRANA lista!
+      const lista = document.createElement("ol");
       let suma = 0;
       let brojac = 0;
 
@@ -549,7 +505,7 @@ document.getElementById("dohvati").addEventListener("click", (e) => {
       });
 
       const popisDiv = document.getElementById("popis");
-      popisDiv.innerHTML = ""; // očisti staru listu
+      popisDiv.innerHTML = "";
       popisDiv.appendChild(lista);
 
       document.getElementById("suma").innerText = "Ukupna cijena: " + suma + " €";
@@ -558,132 +514,6 @@ document.getElementById("dohvati").addEventListener("click", (e) => {
     .catch((err) => console.log("Greška kod dohvata:", err));
 });
 ```
-
-### Koncert — druga (ispravljena) verzija
-
-*Ista funkcionalnost, drugačiji stil: `res.ok` provjera grešaka i poruka "Nema podataka" za prazan popis. Ispravljene greške iz originala su označene komentarima `// ISPRAVLJENO`.*
-
-```javascript
-document.getElementById("btnSpremi").addEventListener("click", function(e) {
-    e.preventDefault();
-
-    const ime = document.getElementById("ime").value.trim();
-    const trajanje = Number(document.getElementById("trajanje").value.trim());
-
-    // ISPRAVLJENO: sjedalo se MORA pročitati iz radio buttona
-    // (u originalu se koristio, a nigdje definirao -> ReferenceError)
-    let sjedalo;
-    if (document.getElementById("vip").checked) sjedalo = "vip";
-    else if (document.getElementById("regular").checked) sjedalo = "regular";
-    else if (document.getElementById("fanpit").checked) sjedalo = "fanpit";
-
-    // ISPRAVLJENO: datum kao string u formatu sa slike (8/20/2025),
-    // ne cijeli Date objekt (taj bi u JSON-u završio kao ISO format)
-    const datum = new Date().toLocaleDateString("en-US");
-
-    // ISPRAVLJENO: maknut reset radio buttona s početka handlera -
-    // resetiranje PRIJE čitanja pregazi korisnikov odabir!
-    // Reset ide tek u then-u nakon uspješnog slanja.
-
-    if (ime === "" || isNaN(trajanje)) {
-        alert("Molimo ispunite ime i trajanje!");
-        return;
-    }
-    if (ime.length < 3) {
-        alert("Ime mora imati najmanje 3 znaka.");
-        return;
-    }
-
-    let cijena = 0;
-    if (sjedalo === "vip") cijena = 10;
-    if (sjedalo === "regular") cijena = 5;
-    if (sjedalo === "fanpit") cijena = 2;
-
-    // ISPRAVLJENO: > 100, ne < 100 (dodatak ide DUGIM koncertima!)
-    if (trajanje > 100) cijena += 5;
-
-    const novaKarta = {
-        cijena: cijena,
-        datum: datum,
-        detalji: {
-            ime: ime,
-            sjedalo: sjedalo,
-            trajanje: trajanje
-        }
-    };
-
-    fetch("http://localhost:4000/koncert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(novaKarta)
-    })
-        .then(res => {
-            if (!res.ok) throw new Error("Greška kod slanja podataka");
-            return res.text();
-        })
-        .then(msg => {
-            alert(msg);
-            // reset forme - TEK nakon uspješnog slanja!
-            document.getElementById("ime").value = "";
-            document.getElementById("trajanje").value = "";
-            document.getElementById("regular").checked = true;  // vrati na zadanu opciju
-        })
-        .catch(err => {
-            alert(err.message);
-        });
-});
-
-document.getElementById("dohvatiSve").addEventListener("click", function(e) {
-    e.preventDefault();
-
-    fetch("http://localhost:4000/koncert")
-        .then(res => {
-            if (!res.ok) throw new Error("Greška kod dohvata podataka");
-            return res.json();
-        })
-        .then(data => {
-            const popis = document.getElementById("popis");
-            popis.innerHTML = "";
-
-            const lista = document.createElement("ol");
-            popis.appendChild(lista);
-
-            if (data.length === 0) {
-                const li = document.createElement("li");
-                li.textContent = "Nema podataka";
-                lista.appendChild(li);
-                return;
-            }
-
-            let ukupno = 0;
-            let ukuvip = 0;
-
-            data.forEach(karta => {
-                const li = document.createElement("li");
-                li.textContent = `${karta.detalji.sjedalo} - ${karta.detalji.ime}`;
-                lista.appendChild(li);
-
-                ukupno += karta.cijena;
-                if (karta.detalji.sjedalo.toLowerCase() === "vip") {
-                    ukuvip++;
-                }
-            });
-            document.getElementById("suma").textContent = ukupno;
-            document.getElementById("brojac").textContent = ukuvip;  // prilagodi ID svom HTML-u!
-        })
-        .catch(err => {
-            alert(err.message);
-        });
-});
-```
-
-**Što je bilo ispravljeno (za učenje — tipične greške!):**
-1. `sjedalo` se koristio, a nigdje definirao → dodano čitanje radio buttona
-2. `trajanje < 100` → `trajanje > 100` (dodatak ide dugim koncertima)
-3. reset radio buttona s POČETKA handlera premješten u then nakon uspjeha
-4. `new Date()` → `new Date().toLocaleDateString("en-US")` (format sa slike)
-
-**Zapamti redoslijed u handleru: čitaj → provjeri → izračunaj → pošalji → (u then-u) resetiraj.** Ništa se ne resetira prije slanja!
 
 ---
 
@@ -695,32 +525,27 @@ const ol = document.createElement("ol");
 document.getElementById("lista").appendChild(ol);
 
 document.getElementById("Dodaj").addEventListener("click", (e) => {
-  e.preventDefault(); // gumb je u formi - sprijeci submit
+  e.preventDefault();
 
   const naziv = document.getElementById("naziv").value.trim();
   const cijena = Number(document.getElementById("cijena").value);
 
-  // provjera: naziv min 4 znaka, cijena > 0
   if (naziv.length < 4 || isNaN(cijena) || cijena <= 0) {
     alert("Naziv mora imati barem 4 znaka, a cijena mora biti veca od 0!");
     return;
   }
 
-  // maksimalno 5 artikala
   if (listaArtikala.length >= 5) {
     alert("Popis ne smije sadrzavati vise od 5 artikala!");
     return;
   }
 
-  // dodaj u lokalni niz
   listaArtikala.push({ naziv: naziv, cijena: cijena });
 
-  // dodaj <li> u numeriranu listu: <naziv> - <cijena>€
   const li = document.createElement("li");
   li.innerText = `${naziv} - ${cijena}€`;
   ol.appendChild(li);
 
-  // ocisti polja za unos
   document.getElementById("naziv").value = "";
   document.getElementById("cijena").value = "";
 });
@@ -734,11 +559,9 @@ document.getElementById("Spremi").addEventListener("click", (e) => {
     return;
   }
 
-  // ukupna cijena svih artikala u trenutnom popisu
   let ukupnaCijena = 0;
   listaArtikala.forEach((art) => (ukupnaCijena += art.cijena));
 
-  // podatak u istom obliku kao na slici / popis.js
   const zaServer = {
     cijena: ukupnaCijena,
     artikli: listaArtikala,
@@ -751,7 +574,6 @@ document.getElementById("Spremi").addEventListener("click", (e) => {
   })
     .then((res) => res.json())
     .then((data) => {
-      // data = niz SVIH popisa sa servera - statistika MORA biti iz njega
       const brojPopisa = data.length;
       let suma = 0;
       let max = 0;
@@ -760,12 +582,10 @@ document.getElementById("Spremi").addEventListener("click", (e) => {
         if (p.cijena > max) max = p.cijena;
       });
 
-      // toFixed(2) zbog floating pointa (4.7 + 6.49 = 11.190000000000001)
       document.getElementById("brPopisa").innerText = brojPopisa;
       document.getElementById("sumaPopisa").innerText = suma.toFixed(2);
       document.getElementById("maxPopis").innerText = max.toFixed(2);
 
-      // nakon uspjesnog slanja brisemo sve artikle iz popisa
       listaArtikala = [];
       ol.innerHTML = "";
     })
@@ -773,16 +593,15 @@ document.getElementById("Spremi").addEventListener("click", (e) => {
 });
 ```
 
-**Napomena:** `toFixed(2)` — kod zbrajanja decimalnih brojeva JS zna vratiti `11.190000000000001`; `toFixed(2)` zaokruži na 2 decimale.
+---
 
-# Grupa B - Novi zaposleník - RJEŠENJE
+## Grupa B - Novi zaposleník
 
 ```javascript
 // ===== DODAJ NOVOG ZAPOSLENIKA =====
 document.getElementById("dodaj").addEventListener("click", (e) => {
   e.preventDefault();
 
-  // RECENICA 1: Unosi se ime, prezime, email, godina, kolegij, status
   const ime = document.getElementById("ime").value.trim();
   const prezime = document.getElementById("prezime").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -790,38 +609,32 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
   const kolegij = document.getElementById("kolegij").value;
   const status = document.querySelector('input[name="status"]:checked').value;
 
-  // RECENICA 2: Ime i prezime skupna ne smiju biti kraće od 6 znakova
   if ((ime + prezime).length < 6) {
     alert("Ime i prezime skupna moraju biti najmanje 6 znakova!");
     return;
   }
 
-  // Email mora imati @
   if (!email.includes("@")) {
     alert("Email mora sadržavati @");
     return;
   }
 
-  // Godina mora biti > 1990
   if (godina <= 1990) {
     alert("Godina rođenja mora biti veća od 1990!");
     return;
   }
 
-  // RECENICA 3: Izračunaj broj bodova prema kolegiju
   let bodovi = 0;
   if (kolegij === "Informatika") {
-    bodovi = 63 * 0.05; // 5% dodatnih bodova
+    bodovi = 63 * 0.05;
   } else {
     bodovi = 63;
   }
 
-  // Ako je redovni student, dodaj 10 bodova
   if (status === "redovni") {
     bodovi += 10;
   }
 
-  // RECENICA 4: POST zahtjev sa svim podacima
   const zaposleník = {
     ime: ime,
     prezime: prezime,
@@ -841,12 +654,10 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
     .then(res => res.json())
     .then(data => {
       alert("Zaposleník dodan!");
-      // Očisti formu
       document.getElementById("ime").value = "";
       document.getElementById("prezime").value = "";
       document.getElementById("email").value = "";
       document.getElementById("godina").value = "";
-      // Osvježi popis
       document.getElementById("pretraži").click();
     })
     .catch(err => console.log(err));
@@ -856,7 +667,6 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
 document.getElementById("pretraži").addEventListener("click", (e) => {
   e.preventDefault();
 
-  // RECENICA 5: GET zahtjev sa parametrima kolegiji i godinaRođenja
   const kolegij = document.getElementById("filterKolegij").value;
   const godinaRođenja = document.getElementById("filterGodina").value;
 
@@ -872,14 +682,16 @@ document.getElementById("pretraži").addEventListener("click", (e) => {
     .catch(err => console.log(err));
 });
 ```
-# Grupa C - Novi sportaš - RJEŠENJE
+
+---
+
+## Grupa C - Novi sportaš
 
 ```javascript
 // ===== DODAJ NOVOG SPORTAŠA =====
 document.getElementById("dodaj").addEventListener("click", (e) => {
   e.preventDefault();
 
-  // RECENICA 1: Unosi se ime, prezime, email, godina, sport, status
   const ime = document.getElementById("ime").value.trim();
   const prezime = document.getElementById("prezime").value.trim();
   const email = document.getElementById("email").value.trim();
@@ -887,41 +699,34 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
   const sport = document.getElementById("sport").value;
   const status = document.querySelector('input[name="statusSportasa"]:checked').value;
 
-  // RECENICA 2: Ime i prezime skupna ne smiju biti kraće od 5 znakova
   if ((ime + prezime).length < 5) {
     alert("Ime i prezime skupna moraju biti najmanje 5 znakova!");
     return;
   }
 
-  // Email mora imati @
   if (!email.includes("@")) {
     alert("Email mora sadržavati @");
     return;
   }
 
-  // Godina mora biti između 1980 i 2005
   if (godina < 1980 || godina > 2005) {
     alert("Godina rođenja mora biti između 1980 i 2005!");
     return;
   }
 
-  // RECENICA 3: Izračunaj broj treninga
   let treningo = 0;
   if (sport === "nogomет") treningo = 4;
   else if (sport === "tenis") treningo = 3;
   else if (sport === "plivanje") treningo = 5;
 
-  // Ako je profesionalan, dodaj 2 treninga
   if (status === "profesionalan") {
     treningo += 2;
   }
 
-  // Ako je plivanje, dodaj 10%
   if (sport === "plivanje") {
     treningo = treningo + (treningo * 0.10);
   }
 
-  // RECENICA 4: POST zahtjev sa svim podacima
   const sportaš = {
     ime: ime,
     prezime: prezime,
@@ -943,12 +748,10 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
     .then(res => res.json())
     .then(data => {
       alert("Sportaš dodan!");
-      // Očisti formu
       document.getElementById("ime").value = "";
       document.getElementById("prezime").value = "";
       document.getElementById("email").value = "";
       document.getElementById("godina").value = "";
-      // Osvježi popis
       document.getElementById("pretraži").click();
     })
     .catch(err => console.log(err));
@@ -958,7 +761,6 @@ document.getElementById("dodaj").addEventListener("click", (e) => {
 document.getElementById("pretraži").addEventListener("click", (e) => {
   e.preventDefault();
 
-  // RECENICA 5: GET zahtjev sa parametrom sport
   const sport = document.getElementById("filterSport").value;
 
   fetch(`http://localhost:4000/sportasi?sport=${sport}`)
@@ -973,46 +775,43 @@ document.getElementById("pretraži").addEventListener("click", (e) => {
     .catch(err => console.log(err));
 });
 ```
-# 3. Ispitni rok - Koncert - RJEŠENJE
+
+---
+
+## 3. Ispitni rok - Koncert
 
 ```javascript
 // ===== DODAJ NOVU KARTU =====
 document.getElementById("spremi").addEventListener("click", (e) => {
   e.preventDefault();
 
-  // RECENICA 1: Unosi se izvođač, datum (Date objekt!) i pozicija sjedala
   const izvođač = document.getElementById("izvođač").value.trim();
-  const datum = new Date().toLocaleDateString("hr-HR"); // Automatski DATUM!
+  const datum = new Date().toLocaleDateString("hr-HR");
   const trajanje = Number(document.getElementById("trajanje").value);
   let pozicija;
   if (document.getElementById("vip").checked) pozicija = "vip";
   else if (document.getElementById("regular").checked) pozicija = "regular";
   else if (document.getElementById("fanpit").checked) pozicija = "fanpit";
 
-  // RECENICA 2: Izvođač ne smije biti kraći od 3 znaka
   if (izvođač.length < 3) {
     alert("Izvođač mora imati najmanje 3 znaka!");
     return;
   }
 
-  // Datum mora biti definiran
   if (!datum) {
     alert("Datum nije definiran!");
     return;
   }
 
-  // RECENICA 3: Izračunaj cijenu po poziciji + dodatak ako je trajanje > 100 minuta
   let cijena = 0;
   if (pozicija === "vip") cijena = 10;
   else if (pozicija === "regular") cijena = 5;
   else if (pozicija === "fanpit") cijena = 2;
 
-  // Ako je trajanje > 100 minuta, dodaj 5€
   if (trajanje > 100) {
     cijena += 5;
   }
 
-  // RECENICA 4: POST zahtjev sa svim podacima
   const karta = {
     cijena: cijena,
     datum: datum,
@@ -1031,11 +830,9 @@ document.getElementById("spremi").addEventListener("click", (e) => {
     .then(res => res.text())
     .then(msg => {
       alert(msg);
-      // Očisti formu nakon uspješnog slanja
       document.getElementById("izvođač").value = "";
       document.getElementById("trajanje").value = "";
       document.getElementById("regular").checked = true;
-      // Osvježi popis
       document.getElementById("dohvati").click();
     })
     .catch(err => console.log(err));
@@ -1045,11 +842,9 @@ document.getElementById("spremi").addEventListener("click", (e) => {
 document.getElementById("dohvati").addEventListener("click", (e) => {
   e.preventDefault();
 
-  // RECENICA 5: GET zahtjev za sve karte
   fetch("http://localhost:4000/koncert")
     .then(res => res.json())
     .then(data => {
-      // Prikaži sve karte u listi
       const lista = document.createElement("ol");
       let suma = 0;
       let brojVIP = 0;
@@ -1072,11 +867,12 @@ document.getElementById("dohvati").addEventListener("click", (e) => {
     .catch(err => console.log(err));
 });
 ```
-// =====================================================
-// VINARIJA - 1. ROK (GET + PUT)
-// =====================================================
-// Učitaj podatke vina po ID-u, ažuriraj i pošalji na server
 
+---
+
+## Vinarija - 1. ROK (GET + PUT)
+
+```javascript
 // UČITAJ ZAPIS - GET sa ID-om
 document.getElementById('ucitaj').addEventListener('click', (e) => {
   e.preventDefault();
@@ -1084,7 +880,6 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
   const idEl = document.getElementById('id_unos');
   const id = idEl.value.trim();
   
-  // Validacija
   if(!id) {
     alert("Trebam ID vina!");
     idEl.style.border = "2px solid red";
@@ -1093,12 +888,10 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
   
   idEl.style.border = "2px solid black";
   
-  // ✅ GET zahtjev - Dohvati podatke vina
   fetch(`http://localhost:4000/vino/${id}`)
     .then(res => {
-      // Status 204 = Nema sadržaja (vino ne postoji)
       if(res.status === 204) {
-        alert("❌ Ne postoji podatak sa ovim ID-om!");
+        alert("Ne postoji podatak sa ovim ID-om!");
         return null;
       }
       return res.json();
@@ -1106,7 +899,6 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
     .then(data => {
       if(!data) return;
       
-      // ✅ Prikaži podatke u formi
       document.getElementById('id_rez').value = data.id;
       document.getElementById('ime').value = data.ime;
       document.getElementById('vinog').value = data.vinog;
@@ -1114,14 +906,11 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
       document.getElementById('proizvodac').value = data.nazivProizvodaca;
       document.getElementById('organsko').checked = data.organsko;
       
-      // Zabrani mijenjanje ID-a
       document.getElementById('id_rez').disabled = true;
       document.getElementById('id_rez').style.backgroundColor = "#e0e0e0";
-      
-      console.log("✅ Podaci učitani:", data);
     })
     .catch(err => {
-      console.log("❌ Greška pri učitavanju:", err);
+      console.log("Greška pri učitavanju:", err);
       alert("Došlo je do greške!");
     });
 });
@@ -1130,7 +919,6 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
 document.getElementById('azuriraj').addEventListener('click', (e) => {
   e.preventDefault();
   
-  // Dohvati podatke iz forme
   const id = document.getElementById('id_rez').value;
   const imeEl = document.getElementById('ime');
   const ime = imeEl.value.trim();
@@ -1146,7 +934,6 @@ document.getElementById('azuriraj').addEventListener('click', (e) => {
   
   const organsko = document.getElementById('organsko').checked;
   
-  // ✅ VALIDACIJA
   if(!ime) {
     imeEl.style.border = "2px solid red";
     alert("Trebam ime vina!");
@@ -1175,7 +962,6 @@ document.getElementById('azuriraj').addEventListener('click', (e) => {
   }
   prodEl.style.border = "2px solid black";
   
-  // ✅ PUT zahtjev - Ažuriraj podatke
   fetch(`http://localhost:4000/vino/${id}`, {
     method: "PUT",
     headers: { 
@@ -1192,19 +978,21 @@ document.getElementById('azuriraj').addEventListener('click', (e) => {
   })
     .then(res => res.json())
     .then(data => {
-      alert("✅ Vino uspješno ažurirano!");
+      alert("Vino uspješno ažurirano!");
       console.log("Ažurirani podaci:", data);
     })
     .catch(err => {
-      console.log("❌ Greška pri ažuriranju:", err);
+      console.log("Greška pri ažuriranju:", err);
       alert("Došlo je do greške!");
     });
 });
-// =====================================================
-// KERAMIKA - GRUPA A (GET + PUT)
-// =====================================================
-// Učitaj podatke kursa po ID-u, ažuriraj i pošalji na server
+```
 
+---
+
+## Keramika - Grupa A (GET + PUT)
+
+```javascript
 // UČITAJ ZAPIS - GET sa ID-om
 document.getElementById('ucitaj').addEventListener('click', (e) => {
   e.preventDefault();
@@ -1212,7 +1000,6 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
   const idEl = document.getElementById('id_unos');
   const id = idEl.value.trim();
   
-  // Validacija
   if(!id) {
     alert("Trebam ID kursa!");
     idEl.style.border = "2px solid red";
@@ -1221,12 +1008,10 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
   
   idEl.style.border = "2px solid black";
   
-  // ✅ GET zahtjev - Dohvati podatke kursa
   fetch(`http://localhost:4000/keramika/${id}`)
     .then(res => {
-      // Status 204 = Nema sadržaja (kurs ne postoji)
       if(res.status === 204) {
-        alert("❌ Ne postoji podatak sa ovim ID-om!");
+        alert("Ne postoji podatak sa ovim ID-om!");
         return null;
       }
       return res.json();
@@ -1234,7 +1019,6 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
     .then(data => {
       if(!data) return;
       
-      // ✅ Prikaži podatke u formi
       document.getElementById('id_rez').value = data.id;
       document.getElementById('ime').value = data.ime;
       document.getElementById('nivo').value = data.nivo;
@@ -1242,14 +1026,11 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
       document.getElementById('predavac').value = data.nazivPredavaca;
       document.getElementById('iskustvo').value = data.iskustvoGodina;
       
-      // Zabrani mijenjanje ID-a
       document.getElementById('id_rez').disabled = true;
       document.getElementById('id_rez').style.backgroundColor = "#e0e0e0";
-      
-      console.log("✅ Podaci učitani:", data);
     })
     .catch(err => {
-      console.log("❌ Greška pri učitavanju:", err);
+      console.log("Greška pri učitavanju:", err);
       alert("Došlo je do greške!");
     });
 });
@@ -1258,7 +1039,6 @@ document.getElementById('ucitaj').addEventListener('click', (e) => {
 document.getElementById('azuriraj').addEventListener('click', (e) => {
   e.preventDefault();
   
-  // Dohvati podatke iz forme
   const id = document.getElementById('id_rez').value;
   
   const imeEl = document.getElementById('ime');
@@ -1276,7 +1056,6 @@ document.getElementById('azuriraj').addEventListener('click', (e) => {
   const iskEl = document.getElementById('iskustvo');
   const iskustvo = parseInt(iskEl.value);
   
-  // ✅ VALIDACIJA
   if(!ime) {
     imeEl.style.border = "2px solid red";
     alert("Trebam ime kursa!");
@@ -1307,12 +1086,11 @@ document.getElementById('azuriraj').addEventListener('click', (e) => {
   
   if(iskustvo < 5) {
     iskEl.style.border = "2px solid red";
-    alert("❌ Iskustvo mora biti najmanje 5 godina!");
+    alert("Iskustvo mora biti 5+ godina!");
     return;
   }
   iskEl.style.border = "2px solid black";
   
-  // ✅ PUT zahtjev - Ažuriraj podatke
   fetch(`http://localhost:4000/keramika/${id}`, {
     method: "PUT",
     headers: { 
@@ -1325,16 +1103,17 @@ document.getElementById('azuriraj').addEventListener('click', (e) => {
       trajanjeTjedana: trajanje,
       nazivPredavaca: predavac,
       iskustvoGodina: iskustvo,
-      materijali: true  // Automatski
+      materijali: true
     })
   })
     .then(res => res.json())
     .then(data => {
-      alert("✅ Kurs uspješno ažuriran!");
+      alert("Kurs uspješno ažuriran!");
       console.log("Ažurirani podaci:", data);
     })
     .catch(err => {
-      console.log("❌ Greška pri ažuriranju:", err);
+      console.log("Greška pri ažuriranju:", err);
       alert("Došlo je do greške!");
     });
 });
+```
